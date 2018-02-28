@@ -1,0 +1,6 @@
+3
+dog
+cat
+alex
+dog
+alex
