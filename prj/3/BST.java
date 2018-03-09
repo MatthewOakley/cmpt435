@@ -11,46 +11,22 @@
 
 import java.util.Scanner;
 
-/* A BSTNode represents a node in a binary search tree. Each BSTNode object
- * stores a single item (called "data"). Each object also has left and right
- * pointers, which point to the left and right subtrees.
- *
- * The BST can be seen as superclass of the BSTNode class, so that the BST 
- * may make changes to the internals of a BSTNode.
- *
- * The constructor is provided for you; read it carefully.
- *
- * The getLeft(), getRight(), and getData() methods are useful for the
- * EncryptionTree class (or any class that wants to have read-only access to the
- * nodes of a BST).
- *
- * The printPreorder() traverses this node and its children recursively in
- * pre-order and prints each node it visits to standard output (i.e.
- * System.in). It presumes that "data" can be printed; that is, 
- * "System.out.print(this.data)" is a statement that makes sense. At each 
- * level of the tree it adds two spaces of indentation to show the structure 
- * of the tree. The run-time of printPreorder() is O(n). Can you figure out 
- * why?  Could it be made more efficient?
- *
- * The minNode() and maxNode() methods are useful in verifySearchOrder(). They
- * should find the leftmost and rightmost node at or below the node they are
- * called on. These can be implemented recursively or iteratively.
- *
- * The function verifySearchOrder() can be used to do verifications of the
- * binary search tree's order. It can and should be used for testing purposes.
- * If you implement minNode() and maxNode() efficiently, the run-time of
- * verifySearchOrder() is O(n^2) for this (potentially unbalanced) tree. Can you
- * figure out why?  Could it be made more efficient using different techniques?
- *
- * No one may call the copy constructor on a BSTNode, it is hereby forbidden,
- * so it is protected and will crash the program if called.
+/**
+ * BSTNode
+ * 
+ * This class implements an object that will be
+ * used as a node with a tree this has two children
+ * they can either be null or another BSTNode and each
+ * node has a corresponding string
  */
-
 class BSTNode {
+  
   /*
    * The default constructor
    */
-  protected  BSTNode(BSTNode t) { assert(false); }
+  protected  BSTNode(BSTNode t){ 
+    assert(false); 
+  }
 
   protected  String data;
   protected  BSTNode left;
@@ -119,16 +95,18 @@ class BSTNode {
    * Return value: none
    */
   public void printPreorder(BSTNode node, String indent) {
-    System.out.println(indent + node.getData());
-    if(node.hasLeft()){
+    if(node != null)
+      System.out.println(indent + node.getData());
+    if(node.hasLeft())
       printPreorder(node.getLeft(), ("  " + indent));
-    }
-    if(node.hasRight()){
+    else
+      System.out.println(indent + "  NULL");
+    if(node.hasRight())
       printPreorder(node.getRight(), ("  " + indent));
-    }
-    
+    else
+      System.out.println(indent + "  NULL");
   }
-   
+  
   /**
    * minNode
    * 
@@ -140,15 +118,14 @@ class BSTNode {
    * Return value: leftmost (minimum) value node
    */
   public BSTNode minNode() { 
-    assert(root);
-    BSTNode temp = root;
+    BSTNode temp = this;
 
-    while(temp != null){
-      temp = root.getLeft();
+    while(temp.hasLeft()){
+      temp = temp.getLeft();
     }
     return temp;
   }
-
+  
   /**
    * maxNode
    * 
@@ -160,11 +137,10 @@ class BSTNode {
    * Return value: rightmost (maximum) value node   
    */  
   public BSTNode maxNode() { 
-    assert(root);
-    BSTNode temp = root;
+    BSTNode temp = this;
 
-    while(temp != null){
-      temp = root.getRight();
+    while(temp.hasRight()){
+      temp = temp.getRight();
     }
     return temp;
   }
@@ -175,16 +151,18 @@ class BSTNode {
    * will check if a parent node has children
    *
    * Parameters:
-   *   input: parent: the child that will be checked
+   *   input: None
    *
    * Return value: true if a node has a child
    */
-  public boolean hasChildren(BSTNode parent){
+  public boolean hasChildren(){
     // checks to see if it has children
-    if(parent.getLeft() != null){
+    // checks for left child
+    if(this.getLeft() != null){
       return true;
     }
-    else if(parent.getRight() != null){
+    // checks for right child
+    else if(this.getRight() != null){
       return true;
     }
     
@@ -198,14 +176,16 @@ class BSTNode {
    * will check if the parent has a left node
    *
    * Parameters:
-   *   input: parent: the node that will be checked
+   *   input: None
    *
    * Return value: true if it has a left node
    */
-  public boolean hasLeft(BSTNode parent){
-    if(parent.getLeft() != null){
+  public boolean hasLeft(){
+    // checking for a left child
+    if(this.getLeft() != null){
       return true;
     }
+    // no left child
     return false;
   }
   
@@ -215,14 +195,16 @@ class BSTNode {
    * will check if the parent has a right node
    *
    * Parameters:
-   *   input: parent: the node that will be checked
+   *   input: None
    *
    * Return value: true if it has a right node
    */
-  public boolean hasRight(BSTNode parent){
-    if(parent.getRight() != null){
+  public boolean hasRight(){
+    // checking for a right child
+    if(this.getRight() != null){
       return true;
     }
+    // no right child
     return false;
   }
   
@@ -237,12 +219,19 @@ class BSTNode {
    * Return value: will return int for before, after, equal
    */
   public int compare(String word){
-    this.getData().compareTo(word);
+    return this.getData().compareTo(word);
   }
   
-  
-  // praise be to pablo help
-  /* professor's implementation of verifySearchOrder(); don't change it */
+  /**
+   * verifySearchOrder
+   * 
+   * will verify the search order
+   *
+   * Parameters:
+   *   input: None
+   *
+   * Return value: None
+   */
   public void verifySearchOrder() {
     if (left != null) {
       assert(left.maxNode().data.compareTo(data) == -1);
@@ -255,24 +244,12 @@ class BSTNode {
   }
 }
 
-/* A BST is a String-based class, but could easily be coded as a generic-type 
- * type class (e.g. with T), that represents a binary search tree. It has one
- * data member, "root", which is a pointer to the root of the tree.
- *
- * The constructor is provided for you.
- *
- * The insert() method places the given item in the tree, unless the item is
- * already in the tree. The insertion should follow the algorithm we discuss in
- * class.
- *
- * The remove() method removes the given item from the tree, if it is in the
- * tree. The remove should follow the algorithm we discuss in class.
- *
- * The printPreorder() and verifySearchOrder() methods simply calls the relevant
- * per-node methods on the root.
- *
- * No one may call the copy constructor on a BST, it is hereby forbidden, so
- * it is protected and will crash the program if called.
+/**
+ * BST
+ * 
+ * This class implements an object that will be
+ * used as a tree and have as many nodes as needed
+ * the tree can also insert or remove nodes
  */
 class BST {
   protected BST(BST t) { assert(false); }
@@ -298,7 +275,12 @@ class BST {
    * Return value: None
    */
   public void insert(String item) { 
-    assert(root);
+    // if the entire tree is null
+    if(root == null){
+      root = new BSTNode(item, null, null);
+      return;
+    }
+    
     BSTNode temp = root;
     while(temp != null){
       // will compare the node data and item
@@ -328,16 +310,14 @@ class BST {
           return;
         }
       }
-      // item is already present in the tree
+      // already in the tree
       else{
-        System.out.println("ALREADY IN DA TREE -Al3X");
         return;
       }
     }
     return;
   }
   
-  // ASSUME THAT THE ITEM IS IN THE TREE -pablo
   /**
    * remove
    * 
@@ -349,20 +329,52 @@ class BST {
    * Return value: None
    */
   public void remove(String item) { 
-    assert(root):
     BSTNode temp = root;
     BSTNode parent = temp;
     // keeps track for parent which side temp is on
     // this is for removal purposes
     boolean wasRight = false;
     
+    // if the tree is empty
+    if(root == null)
+      return;
+    
+    int compareValue = root.getData().compareTo(item);
+    
+    // root needs to be removed and has a left node but not right
+    if(compareValue == 0 && (temp.hasLeft() && !temp.hasRight())){
+      root = root.getLeft();
+      return;
+    }
+    // root needs to be removed and has a right node but not left
+    else if(compareValue == 0 && (temp.hasRight() && !temp.hasLeft())){
+      root = root.getRight();
+      return;
+    }
+    // root needs to be removed and has right
+    else if(compareValue == 0 && root.hasRight()){
+      BSTNode leftMost = new BSTNode(temp.getRight().minNode().getData(), 
+          temp.getLeft(), null);
+      remove(leftMost.getData());
+      leftMost.right = temp.getRight();
+      root = leftMost;
+      return;
+    }
+    // root needs to be removed and has no children
+    else if(compareValue == 0 && !(root.hasChildren())){
+      root = null;
+      return;
+    }
+    
+    // will keep going through the tree until it finds the value
     while(temp != null){
       // will compare the node data and item
-      int compareValue = temp.compare(item);
+      compareValue = temp.getData().compareTo(item);
       
       // go to the left
       if(compareValue > 0){
         parent = temp;
+
         temp = temp.getLeft();
         wasRight = false;
         continue;
@@ -378,7 +390,7 @@ class BST {
       else{
         // node that needs to be removed is a leaf
         // node and can be removed
-        if(!(hasChildren(temp))){
+        if(!(temp.hasChildren())){
           if(wasRight){
             parent.right = null;
             return;
@@ -413,12 +425,27 @@ class BST {
         }
         // has two child(children) nodes
         else{
-          // TODO
           
-          BSTNode leftMost = 
+          // makes a new node with the min value and points it to left node
+          BSTNode leftMost = new BSTNode(temp.getRight().minNode().getData(), 
+              temp.getLeft(), null);
+          // removes that minNode from right tree
+          remove(leftMost.getData());
+          // gets the right node for the new value
+          leftMost.right = temp.getRight();
+          
+          // sets parents new right node
+          if(wasRight){
+            parent.right = leftMost;
+            return;
+          }
+          // sets parents new left node
+          else{
+            parent.left = leftMost;
+            return;
+          }
         }
       }
-      
     }
     return;
   }
@@ -435,7 +462,7 @@ class BST {
    */
   public void printPreorder(){ 
     if(root != null)
-      root.printPreorder(root, ""); 
+      root.printPreorder(root, "");
   }
   
   /**
@@ -455,32 +482,120 @@ class BST {
 
 }
 
-/* An EncryptionTree is a special type of BST which knows how to encrypt a
- * String object (e.g. word) into a string that represents the path to the 
- * object in the tree, and decrypt a path into the String object (e.g. word) 
- * it leads to.
- *
- * The constructor method is provided for you.
- *
- * The encrypt() method takes a String object and returns a string of the form 
- * "rX" where "r" is a literal letter r, and X is a sequence of 0 and 1 
- * characters (which may be empty). The r stands for "root", and each 0 and 1 
- * represent the left/right path from the root to the given object, with 0 
- * indicating a left-branch and 1 indicating a right-branch. If the object is 
- * not in the dictionary, an empty string (or the string "?") should be 
- * returned.
- *
- * The decrypt() method takes an encrypted string (or path through the tree) in
- * the form provided by encrypt(). It should return a pointer to the associated
- * string for the given path (or NULL if the path is invalid).
+/**
+ * EncryptionTree
+ * 
+ * This class implements an object that will be
+ * used as a extension of a BST that is an
+ * encrypted tree and store the paths for the words
+ * that need to be encrypted
  */
 class EncryptionTree extends BST {
-  public EncryptionTree() {}
   
-  public String encrypt(String item) {
-    //-
+  /*
+   * Default Constructor
+   */
+  public EncryptionTree(){
+    
   }
+  
+  /**
+   * encrypt
+   * 
+   * will encrypt a string based on where it belongs
+   *
+   * Parameters:
+   *   input: item: the string that will be encrypted
+   *
+   * Return value: String: the path of the string
+   */
+  public String encrypt(String item) {
+    BSTNode curr = root;
+    String output = "r";
+    
+    // if the root is null then give back ?
+    if(root == null){
+      return "?";
+    }
+    
+    // get the difference to navigate the tree
+    int diff = item.compareTo(root.getData());
+    
+    // while the value is not found
+    while(diff != 0){
+      // go left
+      if(diff < 0){
+        if(curr.hasLeft()){
+          curr = curr.getLeft();
+          output = output.concat("0");
+        }
+        else
+          return "?";
+      }
+      // go right
+      else if(diff > 0){
+        if(curr.hasRight()){
+          curr = curr.getRight();
+          output = output.concat("1");
+        }
+        else
+          return "?";
+      }
+      // already in the tree
+      else{
+        break;
+      }
+      // get the next direction
+      diff = item.compareTo(curr.getData());
+      
+    }
+    // return encrypted word
+    return output;
+    
+    
+  }
+  
+  
+  /**
+   * decrypt
+   * 
+   * will send back decrypted string
+   *
+   * Parameters:
+   *   input: path: the route for the decrypted string
+   *
+   * Return value: String: the decrypted string
+   */
   public String decrypt(String path) { 
-    //-
+    assert(root == null);
+    BSTNode curr = root;
+    
+    // if the root is null
+    if(root == null)
+      return "?";
+    
+    // go and find the decrypted word
+    for(int i = 1; i < path.length(); i++){
+      // if the path says 0
+      if(path.charAt(i) == '0'){
+        if(curr.hasLeft())
+          curr = curr.getLeft();
+        else
+          return "?";
+      }
+      // path says 1
+      else if(path.charAt(i) == '1'){
+        if(curr.hasRight())
+          curr = curr.getRight();
+        else
+          return "?";
+      }
+      // path is not found
+      else{
+        return "?";
+      }
+    }
+    // return that nodes string
+    return (curr.getData());
   }
 }
