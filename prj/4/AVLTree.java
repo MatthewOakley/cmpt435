@@ -39,10 +39,15 @@ import java.util.Scanner;
  * children of this node are correct, and uses them.
  */
 class AVLNode {
-  AVLNode(AVLNode t) { assert(false); }
+  AVLNode(AVLNode t){ 
+    assert(false); 
+  }
 
-  AVLNode(String d, AVLNode l, AVLNode r, int h) {
-    data = d; left = l; right = r; height = h; 
+  AVLNode(String d, AVLNode l, AVLNode r, int h){
+    data = d; 
+    left = l; 
+    right = r; 
+    height = h; 
   }
   
   protected String data;
@@ -75,13 +80,43 @@ class AVLNode {
     height = (lh > rh ? lh : rh) + 1;
   }
 
+  public boolean hasLeft(){
+    if(this.getLeft() != null){
+      return true;
+    }
+    return false;
+  }
+  
+  public boolean hasRight(){
+    if(this.getRight() != null){
+      return true;
+    }
+    return false;
+  }
+  
+  public AVLNode getLeft(){ 
+    return left;  
+  }
+  
+  public AVLNode getRight(){ 
+    return right; 
+  }
+  
+  public String getData(){ 
+    return data;  
+  }
 
-  public AVLNode getLeft()  { return left;  }
-  public AVLNode getRight() { return right; }
-  public String getData()   { return data;  }
-
-  public void printPreorder() {
-    //-
+  public void printPreorder(AVLTNode node, String indent) {
+    if(node != null)
+      System.out.println(indent + node.getData());
+    if(node.hasLeft())
+      printPreorder(node.getLeft(), ("  " + indent));
+    else
+      System.out.println(indent + "  NULL");
+    if(node.hasRight())
+      printPreorder(node.getRight(), ("  " + indent));
+    else
+      System.out.println(indent + "  NULL");
   }
 
   /* professor's implementation of verifySearchOrder(); don't change it */
@@ -105,11 +140,19 @@ class AVLNode {
   }
 
   public AVLNode minNode() {
-    //-
+    AVLNode curr = this;
+    while(curr.getLeft() != null){
+      curr = curr.getLeft();
+    }
+    return curr;
   }
 
   public AVLNode maxNode() {
-    //-
+    AVLNode curr = this;
+    while(curr.getRight() != null){
+      curr = curr.getRight();
+    }
+    return curr;
   }
 }
 
@@ -166,7 +209,7 @@ class AVLTree {
 
   AVLTree(){ 
     root = null; 
-  }  
+  }
 
   protected void rebalancePathToRoot(AVLNode[] path, int numOnPath){
     //-
@@ -186,36 +229,136 @@ class AVLTree {
   }
 
   public void printPreorder(){ 
-    if(root != null)
-      root.printPreorder(); 
+    if(root != null) 
+      root.printPreorder(root, ""); 
   }
 
   public void verifySearchOrder(){ 
-    if(root != null)
+    if(root != null) 
       root.verifySearchOrder(); 
   }
 
   public void verifyBalance(){ 
-    if(root != null)
+    if(root != null) 
       root.verifyBalance(); 
   }
 
 }
 
 
-/* The EncryptionTree for this project is exactly the same as for the previous
- * project, except that it now has an AVLTree as its parent class.
+/**
+ * EncryptionTree
+ * 
+ * This class implements an object that will be
+ * used as a extension of a AVL tree that is an
+ * encrypted tree and store the paths for the words
+ * that need to be encrypted
  */
-class EncryptionTree extends AVLTree{
+class EncryptionTree extends AVLTree {
+  
+  /*
+   * Default Constructor
+   */
   EncryptionTree(){
     
   }
-
-  public String encrypt(String item) {
-    //-
+  
+  /**
+   * encrypt
+   * 
+   * will encrypt a string based on where it belongs
+   *
+   * Parameters:
+   *   input: item: the string that will be encrypted
+   *
+   * Return value: String: the path of the string
+   */
+  public String encrypt(String item){
+    AVLNode curr = root;
+    String output = "r";
+    
+    // if the root is null then give back ?
+    if(root == null){
+      return "?";
+    }
+    
+    // get the difference to navigate the tree
+    int diff = item.compareTo(root.getData());
+    
+    // while the value is not found
+    while(diff != 0){
+      // go left
+      if(diff < 0){
+        if(curr.hasLeft()){
+          curr = curr.getLeft();
+          output = output.concat("0");
+        }
+        else
+          return "?";
+      }
+      // go right
+      else if(diff > 0){
+        if(curr.hasRight()){
+          curr = curr.getRight();
+          output = output.concat("1");
+        }
+        else
+          return "?";
+      }
+      // already in the tree
+      else{
+        break;
+      }
+      // get the next direction
+      diff = item.compareTo(curr.getData());
+      
+    }
+    // return encrypted word
+    return output;
+  }
+  
+  /**
+   * decrypt
+   * 
+   * will send back decrypted string
+   *
+   * Parameters:
+   *   input: path: the route for the decrypted string
+   *
+   * Return value: String: the decrypted string
+   */
+  public String decrypt(String path){
+    assert(root == null);
+    AVLNode curr = root;
+    
+    // if the root is null
+    if(root == null)
+      return "?";
+    
+    // go and find the decrypted word
+    for(int i = 1; i < path.length(); i++){
+      // if the path says 0
+      if(path.charAt(i) == '0'){
+        if(curr.hasLeft())
+          curr = curr.getLeft();
+        else
+          return "?";
+      }
+      // path says 1
+      else if(path.charAt(i) == '1'){
+        if(curr.hasRight())
+          curr = curr.getRight();
+        else
+          return "?";
+      }
+      // path is not found
+      else{
+        return "?";
+      }
+    }
+    // return that nodes string
+    return (curr.getData());
   }
 
-  public String decrypt(String path) {
-    //-
   }
 }
