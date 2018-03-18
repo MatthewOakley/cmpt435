@@ -50,24 +50,72 @@ class AVLNode {
     height = h; 
   }
   
+  void recalculateHeight(){
+    int leftHeight = -1;
+    int rightHeight = -1;
+    
+    if(this.getLeft() != null){
+      leftHeight = this.getLeft().height;
+    }
+    
+    if(this.getRight() != null){
+      rightHeight = this.getLeft().height;
+    }
+    
+    height = 1 + (leftHeight > rightHeight ? leftHeight : RightHeight);
+  }
+  
   protected String data;
   protected AVLNode left, right;
   protected int height;
   
-  protected AVLNode singleRotateLeft() {
-    //-
+  protected AVLNode singleRotateLeft(AVLNode node, AVLNode parent) {
+    AVLNode rightChild = node.getRight();
+    node.right = rightChild.getLeft();
+    rightChild.left = node;
+    
+    if(parent != null){
+      if(parent.right == node){
+        parent.right = rightChild;
+      }
+      else{
+        parent.left = rightChild;
+      }
+    }
+    
+    node.recalculateHeight();
+    rightChild.recalculateHeight();
+    parent.recalculateHeight();
   }
 
-  protected AVLNode singleRotateRight() {
-    //-
+  protected AVLNode singleRotateRight(AVLNode node, AVLNode parent){
+    AVLNode leftChild = node.getLeft();
+    node.left = leftChild.getRight();
+    leftChild.right = node;
+    
+    if(parent != null){
+      if(parent.left == node){
+        parent.left = leftChild;
+      }
+      else{
+        parent.right = leftChild;
+      }
+    }
+    
+    node.recalculateHeight();
+    leftChild.recalculateHeight();
+    parent.recalculateHeight();
+    
   }
 
-  protected AVLNode doubleRotateLeftRight() {
-    //-
+  protected AVLNode doubleRotateLeftRight(AVLNode node, AVLNode parent) {
+    singleRotateLeft(node, parent);
+    singleRotateRight(node, parent);
   }
 
   protected AVLNode doubleRotateRightLeft() {
-    //-
+    this.singleRotateRight(node, parent);
+    this.singleRotateLeft(node, parent);
   }
   
   protected static int getHeight(AVLNode n) { 
@@ -89,6 +137,13 @@ class AVLNode {
   
   public boolean hasRight(){
     if(this.getRight() != null){
+      return true;
+    }
+    return false;
+  }
+  
+  public boolean hasChildren(){
+    if(this.hasLeft() || this.hasRight()){
       return true;
     }
     return false;
@@ -201,12 +256,21 @@ class AVLNode {
  * imbalances.
  */
 class AVLTree {
+  
+  // data values
+  // the top of the tree
   protected AVLNode root;
   
+  /*
+   * tree Constructor
+   */
   AVLTree(AVLTree t){ 
     assert(false); 
   }
 
+  /*
+   * Default Constructor
+   */
   AVLTree(){ 
     root = null; 
   }
