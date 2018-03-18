@@ -1,4 +1,16 @@
+/**
+ * file: AVLTree.java
+ * author: Matthew Oakley
+ * course: CMPT 435-801
+ * assignment: Project 4
+ * due date: April 6, 2018
+ * version: 1 
+ *
+ * This is for the AVLTree class
+ */
+
 import java.util.Scanner;
+import java.util.Queues;
 
 /* An AVLNode represents a node in an AVL-balanced binary search tree. Each
  * AVLNode object stores a single item (called "data"). Each object also has
@@ -86,6 +98,8 @@ class AVLNode {
     node.recalculateHeight();
     rightChild.recalculateHeight();
     parent.recalculateHeight();
+    
+    return node;
   }
 
   protected AVLNode singleRotateRight(AVLNode node, AVLNode parent){
@@ -106,16 +120,18 @@ class AVLNode {
     leftChild.recalculateHeight();
     parent.recalculateHeight();
     
+    return node;
+    
   }
 
   protected AVLNode doubleRotateLeftRight(AVLNode node, AVLNode parent) {
-    singleRotateLeft(node, parent);
+    node = singleRotateLeft(node, parent);
     singleRotateRight(node, parent);
   }
 
-  protected AVLNode doubleRotateRightLeft() {
-    this.singleRotateRight(node, parent);
-    this.singleRotateLeft(node, parent);
+  protected AVLNode doubleRotateRightLeft(AVLNode node, AVLNode parent) {
+    node = singleRotateRight(node, parent);
+    singleRotateLeft(node, parent);
   }
   
   protected static int getHeight(AVLNode n) { 
@@ -289,7 +305,28 @@ class AVLTree {
   }
 
   public void printLevelOrder(){
-    //-
+    Queue<AVLNode> printOrder = new Queue();
+    indent = "";
+    
+    if(root != null)
+      printOrder.add(root);
+    else
+      return;
+    
+    while(true){
+      AVLNode front = printOrder.peek();
+      
+      if(front == null)
+        return;
+      
+      if(front.hasLeft())
+        printOrder.add(front.getLeft());
+      if(front.hasRight())
+        printOrder.add(front.getRight());
+      
+      System.out.println(indent + front.getData());
+      printOrder.remove();
+    }
   }
 
   public void printPreorder(){ 
