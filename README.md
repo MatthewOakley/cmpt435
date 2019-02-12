@@ -1,2 +1,1 @@
-# cmpt435
-for algorithms with pablo
+# CMPT 435 - Algorithms
