@@ -10,51 +10,33 @@
  */
 
 import java.util.Scanner;
-import java.util.Queues;
+import java.util.Queue;
+import java.lang.Math;
+import java.util.*;
 
-/* An AVLNode represents a node in an AVL-balanced binary search tree. Each
- * AVLNode object stores a single item (called "data"). Each object also has
- * left and right references, which point to the left and right subtrees, and it
- * knows its own height (the path length to its deepest descendant).
- *
- * The AVLTree can be seen as superclass of the AVLNode class, so that the 
- * AVLTree may make changes to the internals of an AVLNode.
- *
- * Many of the methods in this class are virtually identical to those in the
- * BSTNode in the previous project (#3), including the constructor,
- * getLeft(), getRight(), getData(), printPreorder(), verifySearchOrder(),
- * minNode(), maxNode(), and the copy constructor.
- *
- * The function verifyBalance() can be used to do verifications that the AVL
- * balance property holds at each node. It also can and should be used for
- * testing purposes. What is its running time?
- *
- * The singleRotateLeft() and singleRotateRight() methods do a single rotation
- * on the node they are called on, and return a reference to the node that takes
- * its place (so that the node's parent's reference can be changed).  Note that
- * these methods should update the heights of some nodes as necessary.
- *
- * The doubleRotateLeftRight() and doubleRotateRightLeft() methods do a double
- * rotation on the node they are called on. This is really simple if you have
- * implemented the single rotation methods; my double rotation methods are two
- * lines each. These methods return a reference to the node which took the place
- * of the node the method was called on (so that the node's parent's reference 
- * can be changed).
- *
- * The getHeight() method is a static method which takes a reference to a node,
- * and returns the height of that node (or -1 if the reference is NULL). This
- * makes it easy to find the height of any node with a reference, without having
- * to check for NULL.
- *
- * The updateHeight() method calculates and updates the value of the height on
- * the node it's called on. It assumes that the height values for the two
- * children of this node are correct, and uses them.
+/**
+ * AVLNode
+ * 
+ * This class is a node that will be used in
+ * an AVLTree
  */
 class AVLNode {
+  
+  // data values
+  protected String data;
+  protected AVLNode left, right;
+  protected int height;
+  
+  /*
+   * Node Constructor
+   */
   AVLNode(AVLNode t){ 
     assert(false); 
   }
-
+  
+  /*
+   * Full Node Constructor
+   */
   AVLNode(String d, AVLNode l, AVLNode r, int h){
     data = d; 
     left = l; 
@@ -62,88 +44,160 @@ class AVLNode {
     height = h; 
   }
   
+  /**
+   * recalculateHeight
+   * 
+   * will find the current height based on the children
+   *
+   * Parameters:
+   *   None
+   *
+   * Return value: None
+   */
   void recalculateHeight(){
     int leftHeight = -1;
     int rightHeight = -1;
     
-    if(this.getLeft() != null){
+    // look at left child if not null
+    if(this.left != null){
       leftHeight = this.getLeft().height;
     }
     
-    if(this.getRight() != null){
-      rightHeight = this.getLeft().height;
+    // look at right child if not null
+    if(this.right != null){
+      rightHeight = this.getRight().height;
     }
     
-    height = 1 + (leftHeight > rightHeight ? leftHeight : RightHeight);
+    height = 1 + (leftHeight > rightHeight ? leftHeight : rightHeight);
   }
   
-  protected String data;
-  protected AVLNode left, right;
-  protected int height;
-  
-  protected AVLNode singleRotateLeft(AVLNode node, AVLNode parent) {
-    AVLNode rightChild = node.getRight();
-    node.right = rightChild.getLeft();
-    rightChild.left = node;
-    
-    if(parent != null){
-      if(parent.right == node){
-        parent.right = rightChild;
-      }
-      else{
-        parent.left = rightChild;
-      }
-    }
-    
+  /**
+   * singleRotateLeft
+   * 
+   * will rotate a subtree left
+   *
+   * Parameters:
+   *   node: the left node that will be rotated
+   *   parent: the parent that wiil also be rotated
+   *
+   * Return value: AVLNode: a reference of the new parent node
+   */
+  protected AVLNode singleRotateLeft(AVLNode node) {
+    AVLNode rightChild = node.getLeft();
+    this.right = rightChild;
+    node.left = this;
+    this.recalculateHeight();
     node.recalculateHeight();
-    rightChild.recalculateHeight();
-    parent.recalculateHeight();
+    
+    if(rightChild != null){
+      rightChild.recalculateHeight();
+    }
     
     return node;
   }
-
-  protected AVLNode singleRotateRight(AVLNode node, AVLNode parent){
-    AVLNode leftChild = node.getLeft();
-    node.left = leftChild.getRight();
-    leftChild.right = node;
+  
+  /**
+   * singleRotateRight
+   * 
+   * will rotate a subtree right
+   *
+   * Parameters:
+   *   node: the right node that will be rotated
+   *
+   * Return value: AVLNode: a reference of the new parent node
+   */
+  protected AVLNode singleRotateRight(AVLNode node){
+    AVLNode leftChild = node.getRight();
+    this.left = leftChild;
+    node.right = this;
     
-    if(parent != null){
-      if(parent.left == node){
-        parent.left = leftChild;
-      }
-      else{
-        parent.right = leftChild;
-      }
-    }
-    
+    this.recalculateHeight();
     node.recalculateHeight();
-    leftChild.recalculateHeight();
-    parent.recalculateHeight();
+    if(leftChild != null){
+      leftChild.recalculateHeight();
+    }
     
     return node;
     
   }
 
-  protected AVLNode doubleRotateLeftRight(AVLNode node, AVLNode parent) {
-    node = singleRotateLeft(node, parent);
-    singleRotateRight(node, parent);
+  /**
+   * doubleRotateLeftRight
+   * 
+   * will do a left then right single rotate
+   *
+   * Parameters:
+   *   node: the left node that will be rotated
+   *
+   * Return value: AVLNode: a reference of the new parent node
+   */
+  protected AVLNode doubleRotateLeftRight(AVLNode node) {
+    node = node.singleRotateLeft(node.right);
+    node.recalculateHeight();
+    AVLNode newNode = this.singleRotateRight(node);
+    newNode.recalculateHeight();
+    return newNode;
   }
 
-  protected AVLNode doubleRotateRightLeft(AVLNode node, AVLNode parent) {
-    node = singleRotateRight(node, parent);
-    singleRotateLeft(node, parent);
+  /**
+   * doubleRotateRightLeft
+   * 
+   * will do a right then left single rotate
+   *
+   * Parameters:
+   *   node: the left node that will be rotated
+   *   parent: the parent that wiil also be rotated
+   *
+   * Return value: AVLNode: a reference of the new parent node
+   */
+  protected AVLNode doubleRotateRightLeft(AVLNode node) {
+    node = node.singleRotateRight(node.left);
+    node.recalculateHeight();
+    AVLNode newNode = this.singleRotateLeft(node);
+    newNode.recalculateHeight();
+    return newNode;
   }
   
+  /**
+   * getHeight
+   * 
+   * will get a node's height
+   *
+   * Parameters:
+   *   input: n: a AVLNode
+   *
+   * Return value: int: the height of the node
+   */
   protected static int getHeight(AVLNode n) { 
     return n != null ? n.height : -1; 
   }
 
+  /**
+   * updateHeight
+   * 
+   * will update the height of the current node
+   *
+   * Parameters:
+   *   input: None
+   *
+   * Return value: None
+   */
   protected void updateHeight() {
     int lh = getHeight(left);
     int rh = getHeight(right);
     height = (lh > rh ? lh : rh) + 1;
   }
 
+  /**
+   * hasLeft
+   * 
+   * will check if the parent has a left node
+   *
+   * Parameters:
+   *   input: None
+   *
+   * Return value: true if it has a left node
+   */
   public boolean hasLeft(){
     if(this.getLeft() != null){
       return true;
@@ -151,6 +205,16 @@ class AVLNode {
     return false;
   }
   
+  /**
+   * hasRight
+   * 
+   * will check if the parent has a right node
+   *
+   * Parameters:
+   *   input: None
+   *
+   * Return value: true if it has a right node
+   */
   public boolean hasRight(){
     if(this.getRight() != null){
       return true;
@@ -158,6 +222,16 @@ class AVLNode {
     return false;
   }
   
+  /**
+   * hasChildren
+   * 
+   * will check if a parent node has children
+   *
+   * Parameters:
+   *   input: None
+   *
+   * Return value: true if a node has a child
+   */
   public boolean hasChildren(){
     if(this.hasLeft() || this.hasRight()){
       return true;
@@ -165,32 +239,98 @@ class AVLNode {
     return false;
   }
   
+  /**
+   * getLeft
+   * 
+   * returns the pointer to the left child of a node
+   *
+   * Parameters:
+   *   input: None
+   *
+   * Return value: left child of a node
+   */
   public AVLNode getLeft(){ 
     return left;  
   }
   
+  /**
+   * getRight
+   * 
+   * returns the pointer to the right child of a node
+   *
+   * Parameters:
+   *   input: None
+   *
+   * Return value: right child of a node
+   */
   public AVLNode getRight(){ 
     return right; 
   }
   
+  /**
+   * getData
+   * 
+   * returns the data stored in the node
+   *
+   * Parameters:
+   *   input: None
+   *
+   * Return value: the data in that node
+   */
   public String getData(){ 
     return data;  
   }
 
-  public void printPreorder(AVLTNode node, String indent) {
+  /**
+   * getHeight
+   * 
+   * returns the height of the node
+   *
+   * Parameters:
+   *   input: None
+   *
+   * Return value: the height of the node
+   */
+  public int getHeight(){
+    return this.height;
+  }
+  
+  /**
+   * printPreorder
+   * 
+   * will print out the tree in preorder format
+   *
+   * Parameters:
+   *   input: node: the current node being looked at
+   *          indent: the indentation level
+   *
+   * Return value: none
+   */
+  public void printPreorder(AVLNode node, String indent){
     if(node != null)
       System.out.println(indent + node.getData());
+    
     if(node.hasLeft())
       printPreorder(node.getLeft(), ("  " + indent));
     else
       System.out.println(indent + "  NULL");
+    
     if(node.hasRight())
       printPreorder(node.getRight(), ("  " + indent));
     else
       System.out.println(indent + "  NULL");
   }
 
-  /* professor's implementation of verifySearchOrder(); don't change it */
+  /**
+   * verifySearchOrder
+   * 
+   * verify's the path of a tree
+   *
+   * Parameters:
+   *   input: None
+   *
+   * Return value: None
+   */
   public void verifySearchOrder() {
     if (left != null) {
       assert(left.maxNode().data.compareTo(data) == -1);
@@ -202,7 +342,16 @@ class AVLNode {
     }
   }
 
-  /* professor's implementation of verifyBalance(); don't change it */
+  /**
+   * verifyBalance
+   * 
+   * will check if the tree is balanced
+   *
+   * Parameters:
+   *   input: None
+   *
+   * Return value: None
+   */
   public void verifyBalance() {
     int heightDiff = Math.abs(getHeight(left) - getHeight(right));
     assert(heightDiff <= 1); 
@@ -210,6 +359,16 @@ class AVLNode {
     if (right != null) right.verifyBalance();
   }
 
+  /**
+   * minNode
+   * 
+   * returns the node with the minimum value
+   *
+   * Parameters:
+   *   input: None
+   *
+   * Return value: leftmost (minimum) value node
+   */
   public AVLNode minNode() {
     AVLNode curr = this;
     while(curr.getLeft() != null){
@@ -218,6 +377,16 @@ class AVLNode {
     return curr;
   }
 
+  /**
+   * maxNode
+   * 
+   * returns the node with the maximum value
+   *
+   * Parameters:
+   *   input: None
+   *
+   * Return value: rightmost (maximum) value node   
+   */
   public AVLNode maxNode() {
     AVLNode curr = this;
     while(curr.getRight() != null){
@@ -228,48 +397,11 @@ class AVLNode {
 }
 
 
-/* An AVLTree is a String-based class that represents an AVL-balanced binary 
- * search tree. It has one data member, "root", which is a reference to the 
- * root of the tree.
- *
- * Many of the methods in this class are virtually identical to methods in the
- * BST from the previous project (#3), including the constructor,
- * printPreorder(), verifySearchOrder(), and copy constructor.
- *
- * The insert() and remove() methods behave as in the plain BST, but both
- * methods should rebalance the tree as necessary. This is best done by creating
- * an array of references to AVLNode objects as the insert/remove methods search
- * for the place to do their work.  This array of references represents the path
- * taken to get from the root to the place where a change occurs in the tree.
- * Note that for remove(), this path might go deeper than the node removed, in
- * the case of removing a node with two children (think carefully about this).
- * After insert/remove finish updating the tree, they can pass the path to
- * rebalancePathToRoot() which actually does the rebalancing. Think about how
- * large the array of references needs to be, at its largest. An AVL tree with
- * height 30 must have at least 3,524,577 nodes, and if it has height 50, it
- * must have at least 53,316,291,172 nodes -- probably more than we care to put
- * in the tree. These results come from the minimum size of an AVL tree of
- * height h, which is described in your book as: S(h) = S(h - 1) + S(h - 2) + 1
- * (and base cases S(0) = 1, S(1) = 2).
- *
- * The printLevelOrder() method prints out all the nodes in the tree in
- * level-order (root, then the root's children, then their children, etc.). This
- * is like performing a breadth-first search of the tree. The method should put
- * up to 20 nodes on each line, and use multiple lines as necessary. This method
- * should use a Java queue, and it is iterative (not recursive). This method is
- * useful if we want to transmit the information for building exactly the same
- * tree to our correspondent. If we were to take all the non-NULL nodes and
- * insert them in the order printed by this method, we would get the exact same
- * tree. We would not always be able to construct the exact same tree if we were
- * to use printPreorder() instead.
- *
- * The rebalancePathToRoot() method takes an array of references to AVLNode
- * objects, and the number of references that are on the array. This array should
- * represent the path that needs rebalancing after an insert or remove. It's
- * probably best to have the root at the start of the array. This method should
- * walk from the bottom of the path to the root, checking for imbalances, and
- * correcting any it finds by calling rotation methods as necessary to correct
- * imbalances.
+/**
+ * AVLTree
+ * 
+ * This class is a AVL tree that will be uses
+ * AVL nodes
  */
 class AVLTree {
   
@@ -278,7 +410,7 @@ class AVLTree {
   protected AVLNode root;
   
   /*
-   * tree Constructor
+   * Tree Constructor
    */
   AVLTree(AVLTree t){ 
     assert(false); 
@@ -290,55 +422,521 @@ class AVLTree {
   AVLTree(){ 
     root = null; 
   }
-
-  protected void rebalancePathToRoot(AVLNode[] path, int numOnPath){
-    //-
-  }
-
   
-  public void insert(String item){
-    //-
-  }
-
-  public void remove(String item){
-    //-
-  }
-
-  public void printLevelOrder(){
-    Queue<AVLNode> printOrder = new Queue();
-    indent = "";
+  /**
+   * rebalancePathToRoot
+   * 
+   * This is used to rebalance the tree
+   *
+   * Parameters:
+   *   path: current path from root down
+   *   numOnPath: number of nodes on path
+   *
+   * Return value: None
+   */
+  protected void rebalancePathToRoot(AVLNode[] path, int numOnPath){
+    // so start at end of path and work your way up
+    //printPath(path, numOnPath);
+    // minus 2 so not out of range
+    // also starts at parent of last node
+    numOnPath -= 1;
+    boolean noRotate = true;
+    // recalc bottom node
+    path[numOnPath].recalculateHeight();
     
-    if(root != null)
-      printOrder.add(root);
-    else
+    // starting at end of path and working way back
+    while(numOnPath >= 0){
+      //System.out.println(numOnPath);
+      // the current parent
+      AVLNode currParent = path[numOnPath];
+      //System.out.println(currParent.getData());
+      currParent.recalculateHeight();
+      //currParent.recalculateHeight();
+      
+      // left and right heights
+      int rightHeight = 0;
+      int leftHeight = 0;
+      
+      if( currParent.left != null){
+        leftHeight = currParent.left.height;
+      }
+      else{
+        leftHeight = -1;
+      }
+      
+      if( currParent.right != null){
+        rightHeight = currParent.right.height;
+      }
+      else{
+        rightHeight = -1;
+      }
+      
+      // tree needs to be recalculated
+      if(noRotate && Math.abs(leftHeight - rightHeight) > 1){
+        // the roots is being chagned
+        // will determine single or double
+        
+        // child node heights
+        int leftChildHeight = -1;
+        int rightChildHeight = -1;
+        
+        // on the left side
+        if(leftHeight > rightHeight){
+          //System.out.println("REEEE");
+          // check for double
+          // if true then single rotate
+          if(currParent.left.left != null){
+            leftChildHeight = currParent.left.left.height;
+          }
+          
+          if(currParent.left.right != null){
+            rightChildHeight = currParent.left.right.height;
+          }
+          
+          // left left or single rotation
+          if(leftChildHeight >= rightChildHeight){
+            //System.out.println("LEFT REEEEEEEEE SINGLE");
+            if(numOnPath == 0){
+              root = currParent.singleRotateRight(currParent.left);
+            }
+            else{
+              if(path[numOnPath - 1].right == currParent){
+                path[numOnPath - 1].right = currParent.singleRotateRight(currParent.left);
+              }
+              else{
+                path[numOnPath - 1].left = currParent.singleRotateRight(currParent.left);
+              }
+            }
+          }
+          // double rotate
+          else{
+            //System.out.println("LEFT REEEEEEEEE DOUBLE");
+            if(numOnPath == 0){
+              //System.out.println("ROOT");
+              root = currParent.doubleRotateLeftRight(currParent.left);
+            }
+            else{
+              if(path[numOnPath - 1].right == currParent){
+                path[numOnPath - 1].right = currParent.doubleRotateLeftRight(currParent.left);
+              }
+              else{
+                path[numOnPath - 1].left = currParent.doubleRotateLeftRight(currParent.left);
+              }
+            }
+          }
+        }
+        // on the right side
+        else{
+          // check for double
+          // if true then single rotate
+          if(currParent.right.left != null){
+            leftChildHeight = currParent.right.left.height;
+          }
+          
+          if(currParent.right.right != null){
+            rightChildHeight = currParent.right.right.height;
+          }
+          
+          // right right
+          if(rightChildHeight >= leftChildHeight){
+            if(numOnPath == 0){
+              root = currParent.singleRotateLeft(currParent.right);
+            }
+            else{
+              if(path[numOnPath - 1].right == currParent){
+                path[numOnPath - 1].right = currParent.singleRotateLeft(currParent.right);
+              }
+              else{
+                path[numOnPath - 1].left = currParent.singleRotateLeft(currParent.right);
+              }
+            }
+          }
+          // double rotate
+          else{
+            if(numOnPath == 0){
+              root = currParent.doubleRotateRightLeft(currParent.right);
+            }
+            else{
+              if(path[numOnPath - 1].right == currParent){
+                path[numOnPath - 1].right = currParent.doubleRotateRightLeft(currParent.right);
+              }
+              else{
+                path[numOnPath - 1].left = currParent.doubleRotateRightLeft(currParent.right);
+              }
+            }
+          }
+        }
+        //noRotate = false;
+      }
+      numOnPath -= 1;
+    }
+    root.recalculateHeight();
+  }
+  
+
+  /**
+   * insert
+   * 
+   * will insert a value if it isnt already there
+   *
+   * Parameters:
+   *   input: item: what will be put into the tree
+   *
+   * Return value: None
+   */
+  public void insert(String item){
+    
+     // if the entire tree is null
+    if(root == null){
+      root = new AVLNode(item, null, null, 0);
       return;
+    }
+    
+    int numOnPath = 0;
+    AVLNode[] path = new AVLNode[root.getHeight() + 2];
+    
+    AVLNode temp = root;
+    while(temp != null){
+      // adding the path
+      path[numOnPath] = temp;
+      numOnPath += 1;
+      // will compare the node data and item
+      int compareValue = temp.getData().compareTo(item);
+      
+      // get left
+      if(compareValue > 0){
+        // go left
+        if(temp.getLeft() != null){
+          temp = temp.getLeft();
+          continue;
+        }
+        // insert into tree
+        else{
+          AVLNode newNode = new AVLNode(item, null, null, 0);
+          temp.left = newNode;
+          // add newest element to path
+          path[numOnPath] = newNode;
+          numOnPath += 1;
+          // recalc the path
+          rebalancePathToRoot(path, numOnPath);
+          return;
+        }
+      }
+      // get right
+      else if(compareValue < 0){
+        if(temp.getRight() != null){
+          temp = temp.getRight();
+          continue;
+        }
+        // insert into tree
+        else{
+          AVLNode newNode = new AVLNode(item, null, null, 0);
+          temp.right = newNode;
+          // add the newest element to path
+          path[numOnPath] = newNode;
+          numOnPath += 1;
+          // recalc the path
+          rebalancePathToRoot(path, numOnPath);
+          return;
+        }
+      }
+      // already in the tree
+      else{
+        return;
+      }
+    }
+    return;
+  }
+  
+  /**
+   * printPath
+   * 
+   * This is used to print the path for debugging purposes
+   *
+   * Parameters:
+   *   path: current path from root down
+   *   numOnPath: number of nodes on path
+   *
+   * Return value: None
+   */
+  public void printPath(AVLNode[] path, int numOnPath){
+    for(int i = 0; i < numOnPath; i++)
+      System.out.print(path[i].data + "-");
+    System.out.println();
+  }
+  
+  /**
+   * remove
+   * 
+   * will remove the item from the tree
+   *
+   * Parameters:
+   *   input: item: this will be removed from the tree
+   *
+   * Return value: None
+   */
+  public void remove(String item){
+    // root is null
+    if(root == null){
+      return;
+    }
+    
+    // setup the path
+    int numOnPath = 0;
+    AVLNode[] path = new AVLNode[32];
+    
+    // root needs to be removed
+    if(root.data.compareTo(item) == 0){
+      // has two children
+      if(root.left != null && root.right != null){
+        numOnPath += 1;
+        
+        // setup leftmost child
+        AVLNode leftMost = root.right;
+        AVLNode leftMostParent = null;
+        
+        while(leftMost.left != null){
+          path[numOnPath] = leftMost;
+          numOnPath += 1;
+          leftMostParent = leftMost;
+          leftMost = leftMost.left;
+        }
+        
+        if(leftMostParent != null){
+          leftMostParent.left = leftMost.right;
+          leftMost.right = root.right;
+        }
+        leftMost.left = root.left;
+        root = leftMost;
+        path[0] = leftMost;
+        
+        rebalancePathToRoot(path, numOnPath);
+        return;
+      }
+      // no children
+      else if(root.left == null && root.right == null){
+        root = null;
+        return;
+      }
+      // single child
+      else{
+        root = root.left != null ? root.left : root.right;
+        return;
+      }
+    }
+    
+    // find that node
+    // start the node at the root
+    AVLNode currNode = root;
+    
+    while(currNode != null){
+      path[numOnPath] = currNode;
+      numOnPath += 1;
+      int compareValue = item.compareTo(currNode.data);
+      
+      // go left
+      if(compareValue < 0){
+        currNode = currNode.left;
+      }
+      // go right
+      else if(compareValue > 0){
+        currNode = currNode.right;
+      }
+      // found in tree
+      else{
+        break;
+      }
+    }
+    
+    // not in tree so break out
+    if(currNode == null){
+      return;
+    }
+    
+    // the side of the parent
+    boolean wasRight = false;
+    
+    // parent was left or right
+    if(path[numOnPath - 2].right == currNode){
+      wasRight = true;
+    }
+    
+    // time to remove
+    // leaf
+    if(currNode.left == null && currNode.right == null){
+      if(wasRight)
+        path[numOnPath - 2].right = null;
+      else
+        path[numOnPath - 2].left = null;
+      
+      //numOnPath -= 1;
+    }
+    // two children
+    else if(currNode.left != null && currNode.right != null){
+      // save where old node is
+      int saveSpot = numOnPath - 1;
+      //printPath(path, numOnPath);
+      AVLNode parent = null;
+      if(numOnPath > 2)
+        parent = path[numOnPath - 2];
+      
+      //numOnPath += 1;
+      
+      // setup leftmost child
+      AVLNode leftMost = currNode.right;
+      AVLNode leftMostParent = null;
+        
+      // get leftmost and leftMost parent
+      while(leftMost.left != null){
+        path[numOnPath] = leftMost;
+        numOnPath += 1;
+        leftMostParent = leftMost;
+        leftMost = leftMost.left;
+      }
+        
+      // no parent currNode.right is min node
+      // of that subtree
+      if(leftMostParent != null){
+        leftMostParent.left = leftMost.right;
+        leftMost.right = currNode.right;
+      }
+      
+      // set new node's pointers
+      leftMost.left = currNode.left;
+      path[saveSpot] = leftMost;
+
+      // parent's pointers
+      if(parent != null){
+        if(wasRight){
+          parent.right = leftMost;
+        }
+        else{
+          parent.left = leftMost;
+        }
+      }
+      else{
+        if(wasRight)
+          root.right = leftMost;
+        else
+          root.left = leftMost;
+      }
+    }
+    // has one child
+    else{
+      if(wasRight)
+        path[numOnPath - 2].right = currNode.left != null ? currNode.left : currNode.right;
+      else
+        path[numOnPath - 2].left = currNode.left != null ? currNode.left : currNode.right;
+    }
+    
+    rebalancePathToRoot(path, numOnPath);
+    return;
+  }
+
+  /**
+   * printLevelOrder
+   * 
+   * will print the tree in level order
+   *
+   * Parameters:
+   *   input: None
+   *
+   * Return value: None
+   */
+  public void printLevelOrder(){
+    Queue<AVLNode> printOrder = new LinkedList<AVLNode>();
+    
+    int counter = 0;
+    if(root != null){
+      printOrder.add(root);
+    }
+    else{
+      System.out.println("NULL");
+      return;
+    }
     
     while(true){
+      counter += 1;
       AVLNode front = printOrder.peek();
       
       if(front == null)
-        return;
+        break;
       
-      if(front.hasLeft())
+      if(front.hasLeft()){
         printOrder.add(front.getLeft());
-      if(front.hasRight())
-        printOrder.add(front.getRight());
+      }
+      // if the data has 'NULL  ' everything will DIE!!!!
+      else if(!(front.getData().equals("NULL"))){
+        AVLNode dumbNode = new AVLNode("NULL", null, null, -1);
+        printOrder.add(dumbNode);
+      }
       
-      System.out.println(indent + front.getData());
-      printOrder.remove();
+      if(front.hasRight()){
+        printOrder.add(front.getRight());
+      }
+      // if the data has 'NULL  ' everything will DIE!!!!
+      else if(!(front.getData().equals("NULL"))){
+        AVLNode dumbNode = new AVLNode("NULL", null, null, -1);
+        printOrder.add(dumbNode);
+      }
+      
+      String data = printOrder.remove().getData();
+      if(printOrder.peek() != null && counter != 20){
+        System.out.print(data + " ");
+      }
+      else{
+        System.out.print(data);
+      }
+      
+      if(counter == 20){
+        System.out.print("\n");
+      }
+      
+      counter = counter % 20;
     }
+    System.out.println();
   }
 
+  /**
+   * printPreorder
+   * 
+   * will print the tree in preorder
+   *
+   * Parameters:
+   *   input: None
+   *
+   * Return value: None
+   */
   public void printPreorder(){ 
-    if(root != null) 
+    if(root != null)
       root.printPreorder(root, ""); 
   }
 
+  /**
+   * verifySearchOrder
+   * 
+   * will verify the path of a tree
+   *
+   * Parameters:
+   *   input: None
+   *
+   * Return value: None
+   */
   public void verifySearchOrder(){ 
     if(root != null) 
       root.verifySearchOrder(); 
   }
 
+  /**
+   * verifyBalance
+   * 
+   * will check to see if a tree is balanced
+   *
+   * Parameters:
+   *   input: None
+   *
+   * Return value: None
+   */
   public void verifyBalance(){ 
     if(root != null) 
       root.verifyBalance(); 
@@ -461,5 +1059,5 @@ class EncryptionTree extends AVLTree {
     return (curr.getData());
   }
 
-  }
 }
+
